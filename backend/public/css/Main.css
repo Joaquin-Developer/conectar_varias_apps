@@ -1,0 +1,21 @@
+
+body {
+    font-family: 'Courier New', Courier, monospace;
+}
+
+.error404 {
+    background: rgb(221, 54, 54);
+    color: #fff;
+    padding-left: 0;
+    padding-right: 0;
+    width: 100%;
+}
+
+.container {
+    padding-left: 8%;
+    padding-right: 8%;
+    margin-top: 4%;
+}
+
+.error404 h1 { font-size: 20px; }
+.error404 p { font-size: 16px; }

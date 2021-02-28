@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ingreso de Personas</title>
+    <link rel="stylesheet" href="/public/css/index_styles.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Ingreso de personas</h1>
+        <br>
+        <form>
+            <label for="person_name">Nombre:</label>
+            <input type="text" id="person_name">
+            <button id="save_person">ENVIAR</button>
+            <br>
+            <div class="alerts" id="alerts"></div>
+        </form>
+        <hr>
+        <input type="button" id="get_data" value="Ver todos los registros">
+        <div class="registros" id="registros"></div>
+    </div>
+    <script src="/public/js/script.js"></script>
+</body>
+</html>

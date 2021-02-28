@@ -6,7 +6,6 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.HashMap;
-import java.util.Map;
 
 public class App
 {
@@ -14,7 +13,7 @@ public class App
     {
         // Run code here!
         Form form = new Form();
-        form.setVisible(true);
+        form.showForm();
     }
 }
 
@@ -25,6 +24,7 @@ class Form extends JFrame
      */
     private static final long serialVersionUID = 1L;
     public static HashMap<Integer, String> data;
+    public String stringData = "";
 
     private JLabel lblInsertPerson;
     private JTextField txtName;
@@ -35,7 +35,6 @@ class Form extends JFrame
     {
         initForm();
         initComponents();
-        setVisible(true);
     }
 
     private void initForm()
@@ -46,6 +45,10 @@ class Form extends JFrame
         setDefaultCloseOperation(DISPOSE_ON_CLOSE);
         setLocationRelativeTo(null);
         setResizable(false);
+    }
+
+    public void showForm() {
+        this.setVisible(true);
     }
 
     private void initComponents()
@@ -91,10 +94,13 @@ class Form extends JFrame
     private void btnGetDataActionPerformed(java.awt.event.ActionEvent evt) {
         try {
             data = new HttpRequests().HttpRequestGet_getPersons();
-            // String dataRequest = new HttpRequests().HttpRequestGet_getPersons();
-            System.out.println(data);
-            // System.out.println(dataRequest);
-            // iter data and show in JPanel ...
+            stringData = "";
+
+            data.forEach((k,v) -> stringData += ("Id: " + k + ", Nombre: " + v + "\n"));
+            JOptionPane.showMessageDialog(
+                null, stringData, "Personas registradas en el sistema:", JOptionPane.INFORMATION_MESSAGE
+            );
+
         } catch (Exception e) {
             System.err.println(e);
             JOptionPane.showMessageDialog(null, "Error al obtener datos de la API",
@@ -125,20 +131,24 @@ class HttpRequests
         reader.close();
         System.out.println(result.toString());
 
-        return stringToJson(result.toString());
+        return stringToHashMap(result.toString());
     }
 
-    private HashMap<Integer, String> stringToJson(String result)
+    private HashMap<Integer, String> stringToHashMap(String result)
     {
+        HashMap<Integer, String> map = new HashMap<Integer, String>();
 
-        return new HashMap<Integer, String>();
-    }
+        String objects[] = result.split("}, ");
+        for (String elem : objects) {
+            String fields[] = elem.split(",");            
 
-    private Map<Integer, String> inputStreamToJson()
-    {
-        Map<String,Object> result = new ObjectMapper().readValue(JSON_SOURCE, HashMap.class);
+            Integer id = Integer.parseInt(fields[0].split(":")[1].split(" ")[1]);
+            String name = fields[1].split(": ")[1].split("\"")[1];
+            // add element to map:
+            map.put(id, name);
+        }
+        return map;
     }
     
-
 }
 

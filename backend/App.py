@@ -23,7 +23,7 @@ def get_data():
 def insert_data():
     data = request.get_json(force=True)
     PERSONS_LIST.append({ "id": (len(PERSONS_LIST) + 1), "name": data.get("name") })
-    message = "Datos insertados: id: {} Nombre: {}".format((len(PERSONS_LIST) + 1), data.get("name"))
+    message = "Datos insertados: id: {} Nombre: {}".format((len(PERSONS_LIST)), data.get("name"))
     print(message)
     return json.dumps({ "data": message }, ensure_ascii= False)
 

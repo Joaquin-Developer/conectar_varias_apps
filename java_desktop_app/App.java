@@ -5,7 +5,10 @@ import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.net.URLEncoder;
 import java.util.HashMap;
+import java.util.Map;
+import java.util.LinkedHashMap;
 
 public class App
 {
@@ -83,10 +86,18 @@ class Form extends JFrame
 
     private void btnInsertPersonActionPerformed(java.awt.event.ActionEvent evt) {
         try {
-            JOptionPane.showMessageDialog(null, "En desarrollo");
+            if (txtName.getText().length() == 0) {
+                throw new NullPointerException("Debe ingresar un nombre");
+            }
+            String res = new HttpRequests().HttpRequestPost_insertPersons(txtName.getText());
+            System.out.println(res);
+            txtName.setText("");
+
+        } catch (NullPointerException e) {
+            JOptionPane.showMessageDialog(null, e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
         } catch (Exception e) {
             System.err.println(e);
-            JOptionPane.showMessageDialog(null, "Error al obtener datos de la API",
+            JOptionPane.showMessageDialog(null, "No se pudo insertar el dato debido a un problema con el servidor",
                 "Error", JOptionPane.ERROR_MESSAGE);
         }
     }
@@ -116,7 +127,7 @@ class HttpRequests
 
     public HashMap<Integer, String> HttpRequestGet_getPersons() throws Exception
     {
-        URL url = new URL("http://127.0.0.1:5000/api/v1/get_persons");  // modificar en producción!
+        URL url = new URL("http://127.0.0.1:5000/api/v1/get_persons");  // MODIFY in deploy!
         
         StringBuilder result = new StringBuilder();
         // open connection (type: GET)
@@ -149,6 +160,42 @@ class HttpRequests
         }
         return map;
     }
+
+    public String HttpRequestPost_insertPersons(String name) throws Exception
+    {
+        // object to send in post request:
+        Map<String, Object> params = new LinkedHashMap<>();
+        params.put("name", name);
+
+        URL url = new URL("http://127.0.0.1:5000/api/v1/insert_persons");  // MODIFY in deploy!
+        StringBuilder postData = new StringBuilder();
+
+        for (Map.Entry<String, Object> param : params.entrySet())
+        {
+            if (postData.length() != 0) { postData.append('&'); }
+            postData.append(URLEncoder.encode(param.getKey(), "UTF-8"));
+            postData.append('=');
+            postData.append(URLEncoder.encode(String.valueOf(param.getValue()), "UTF-8"));
+        }
+        byte[] postDataBytes = postData.toString().getBytes("UTF-8");
+
+        HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+		connection.setRequestMethod("POST");
+        connection.setRequestProperty("Content-Type", "application/json");
+        connection.setRequestProperty("Content-Length", String.valueOf(postDataBytes.length));
+        connection.setDoOutput(true);
+        connection.getOutputStream().write(postDataBytes);
+
+        BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream(), "UTF-8"));
+        
+        String resultString = "";
+
+        for (int c = reader.read(); c != -1; c = reader.read())
+            resultString += ((char) c);
+		
+
+        return resultString;
+    }    
     
 }
 

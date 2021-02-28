@@ -3,11 +3,15 @@ import java.awt.*;
 import java.awt.event.*;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.net.URLConnection;
 import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.StringJoiner;
 import java.util.LinkedHashMap;
 
 public class App
@@ -163,38 +167,35 @@ class HttpRequests
 
     public String HttpRequestPost_insertPersons(String name) throws Exception
     {
-        // object to send in post request:
-        Map<String, Object> params = new LinkedHashMap<>();
+        Map<String, String> params = new LinkedHashMap<>();
         params.put("name", name);
 
         URL url = new URL("http://127.0.0.1:5000/api/v1/insert_persons");  // MODIFY in deploy!
-        StringBuilder postData = new StringBuilder();
+        // StringBuilder postData = new StringBuilder();
 
-        for (Map.Entry<String, Object> param : params.entrySet())
-        {
-            if (postData.length() != 0) { postData.append('&'); }
-            postData.append(URLEncoder.encode(param.getKey(), "UTF-8"));
-            postData.append('=');
-            postData.append(URLEncoder.encode(String.valueOf(param.getValue()), "UTF-8"));
+        URLConnection urlConnection = url.openConnection();
+        HttpURLConnection http = (HttpURLConnection) urlConnection;
+        http.setRequestMethod("POST");
+        http.setDoOutput(true);
+
+        StringJoiner stringJoiner = new StringJoiner("&");        
+        for (Map.Entry<String,String> entry : params.entrySet()) {
+            stringJoiner.add(URLEncoder.encode(entry.getKey(), 
+                "UTF-8") + "=" + URLEncoder.encode(entry.getValue(), "UTF-8"));
         }
-        byte[] postDataBytes = postData.toString().getBytes("UTF-8");
+            
+        byte[] out = stringJoiner.toString().getBytes(StandardCharsets.UTF_8);
+        int length = out.length;
 
-        HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-		connection.setRequestMethod("POST");
-        connection.setRequestProperty("Content-Type", "application/json");
-        connection.setRequestProperty("Content-Length", String.valueOf(postDataBytes.length));
-        connection.setDoOutput(true);
-        connection.getOutputStream().write(postDataBytes);
+        http.setFixedLengthStreamingMode(length);
+        http.setRequestProperty("Content-Type", "application/x-www-form-urlencoded; charset=UTF-8");
+        http.connect();
 
-        BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream(), "UTF-8"));
+        OutputStream outputStream = http.getOutputStream();
+        outputStream.write(out);
+
+        return outputStream.toString();
         
-        String resultString = "";
-
-        for (int c = reader.read(); c != -1; c = reader.read())
-            resultString += ((char) c);
-		
-
-        return resultString;
     }    
     
 }
